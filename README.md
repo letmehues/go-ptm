@@ -20,7 +20,7 @@ constrained.
 ## 📦 Installation
 
 ```bash
-go get github.com/your-username/go-sentinel
+go get github.com/letmehues/go-ptm
 ```
 
 ## 🚀 Quick Start
