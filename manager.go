@@ -208,6 +208,7 @@ func (tm *TaskManager) StopTask(name string) error {
 	return tm.stopTaskInternal(tm.tasks[name])
 }
 
+//nolint:unused // 保留用于调试
 func (tm *TaskManager) printTasks() {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
@@ -242,6 +243,7 @@ func (tm *TaskManager) stopTaskInternal(task *Task) error {
 	return nil
 }
 
+//nolint:unused // 保留用于内部状态检查
 func (tm *TaskManager) verifyInvariants() error {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
