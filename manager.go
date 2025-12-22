@@ -160,6 +160,7 @@ func (tm *TaskManager) runTaskWithWatchdog(task *Task) error {
 				task.doneCh <- fmt.Errorf("panic recovered: %v\nStack: %s", r, string(debug.Stack()))
 			}
 		}()
+		task.SetState(TaskStateRunning)
 		task.doneCh <- task.run(runCtx, task)
 	}()
 
