@@ -51,7 +51,7 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-func WithRunFunc(runFn func(ctx context.Context, task *Task) error) Option {
+func WithRunFunc(runFn TaskRunFunc) Option {
 	return func(t *Task) {
 		t.run = runFn
 	}

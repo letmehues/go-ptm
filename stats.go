@@ -31,7 +31,7 @@ func (tm *TaskManager) Stats() Stats {
 	})
 	return Stats{
 		Running:   len(tm.tasks),
-		Capacity:  tm.cap,
+		Capacity:  tm.capacity,
 		Submitted: atomic.LoadUint64(&tm.submitted),
 		Evicted:   atomic.LoadUint64(&tm.evicted),
 		Failure:   atomic.LoadUint64(&tm.failure),

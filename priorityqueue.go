@@ -2,8 +2,8 @@ package ptm
 
 type PriorityQueue []*Task
 
-func NewPriorityQueue(cap int) PriorityQueue {
-	return make(PriorityQueue, 0, cap)
+func NewPriorityQueue(capacity int) PriorityQueue {
+	return make(PriorityQueue, 0, capacity)
 }
 
 func (pq PriorityQueue) Len() int { return len(pq) }

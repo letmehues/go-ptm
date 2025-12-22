@@ -15,7 +15,7 @@ import (
 type TaskManager struct {
 	mu        sync.RWMutex
 	tasks     map[string]*Task
-	cap       int
+	capacity  int
 	submitted uint64 // 任务提交计数
 	evicted   uint64 // 任务丢弃计数
 	failure   uint64 // 任务失败计数
@@ -29,12 +29,12 @@ type TaskManager struct {
 	cancel context.CancelFunc
 }
 
-func NewTaskManager(cap int) *TaskManager {
+func NewTaskManager(capacity int) *TaskManager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskManager{
-		pq:        NewPriorityQueue(cap),
+		pq:        NewPriorityQueue(capacity),
 		tasks:     make(map[string]*Task),
-		cap:       cap,
+		capacity:  capacity,
 		ctx:       ctx,
 		cancel:    cancel,
 		Callbacks: NewDefaultCallbacks(),
@@ -59,7 +59,7 @@ func (tm *TaskManager) Submit(task *Task) error {
 		return ErrTaskAlreadyExists
 	}
 
-	if len(tm.tasks) >= tm.cap {
+	if len(tm.tasks) >= tm.capacity {
 		if tm.pq.Len() == 0 {
 			return ErrTaskQueueIsEmpty
 		}
@@ -137,7 +137,7 @@ func (tm *TaskManager) runTask(task *Task) {
 //	return nil
 //}
 
-//func (tm *TaskManager) Resize(cap int) error {
+//func (tm *TaskManager) Resize(capacity int) error {
 //	tm.mu.RLock()
 //	defer tm.mu.RUnlock()
 //	return nil
@@ -175,6 +175,7 @@ func (tm *TaskManager) runTaskWithWatchdog(task *Task) error {
 				select {
 				case <-task.timeoutCh:
 					return ErrTaskHeartbeatTimeout
+				default:
 				}
 			}
 			return err
@@ -251,8 +252,8 @@ func (tm *TaskManager) verifyInvariants() error {
 	}
 
 	// 2. 检查是否超过容量
-	if len(tm.tasks) > tm.cap {
-		return fmt.Errorf("capacity breached: %d > %d", len(tm.tasks), tm.cap)
+	if len(tm.tasks) > tm.capacity {
+		return fmt.Errorf("capacity breached: %d > %d", len(tm.tasks), tm.capacity)
 	}
 
 	// 3. 检查 Heap 的索引是否正确 (这是并发删除最容易出错的地方)
