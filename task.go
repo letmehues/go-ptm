@@ -18,6 +18,17 @@ type TaskInfo struct {
 	HeartbeatInterval  int64  `json:"heartbeatInterval"`
 }
 
+type TaskState int
+
+const (
+	TaskStateUnknown  = iota
+	TaskStateStarting = iota
+	TaskStateRunning  = iota
+	TaskStateRetrying
+	TaskStateStopping
+	TaskStateStopped
+)
+
 type Task struct {
 	mu                sync.RWMutex
 	Name              string
@@ -39,6 +50,7 @@ type Task struct {
 	timer             *time.Timer
 	timeoutCh         <-chan time.Time
 	doneCh            chan error
+	state             TaskState
 }
 
 func (t *Task) Keepalive() {
@@ -57,6 +69,18 @@ func (t *Task) Keepalive() {
 		t.heartbeatInterval = now.Sub(prev)
 	default:
 	}
+}
+
+func (t *Task) SetState(state TaskState) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.state = state
+}
+
+func (t *Task) GetState() TaskState {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.state
 }
 
 func (t *Task) Info() TaskInfo {
@@ -123,5 +147,6 @@ func NewDefaultTask() *Task {
 		heartbeatCh: make(chan struct{}, 1),
 		timeoutCh:   make(chan time.Time, 1),
 		doneCh:      make(chan error, 1),
+		state:       TaskStateUnknown,
 	}
 }

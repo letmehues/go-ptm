@@ -81,6 +81,7 @@ func (tm *TaskManager) runTask(task *Task) {
 	var reason error
 	tm.Callbacks.OnStart(task.Name)
 	defer func() {
+		task.SetState(TaskStateStopping)
 		err := tm.StopTask(task.Name)
 		if reason == nil && err != nil {
 			reason = err
@@ -89,12 +90,14 @@ func (tm *TaskManager) runTask(task *Task) {
 			reason = task.ctx.Err()
 		}
 		tm.Callbacks.OnStop(task.Name, reason)
+		task.SetState(TaskStateStopped)
 	}()
 	for {
 		if task.ctx.Err() != nil {
 			return
 		}
 		task.SetStartTime(time.Now())
+		task.SetState(TaskStateStarting)
 		err := tm.runTaskWithWatchdog(task)
 		if err == nil {
 			return
@@ -108,6 +111,7 @@ func (tm *TaskManager) runTask(task *Task) {
 		if task.retryLeft > 0 {
 			task.retryLeft--
 			reason = err
+			task.SetState(TaskStateRetrying)
 			tm.Callbacks.OnRetry(task.Name, task.retryLeft, task.retryDelay, err)
 			select {
 			case <-time.After(task.retryDelay):

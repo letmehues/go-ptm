@@ -21,6 +21,9 @@ func (tm *TaskManager) Stats() Stats {
 	tasks := make([]TaskInfo, 0, len(tm.tasks))
 
 	for _, task := range tm.pq {
+		if task.GetState() != TaskStateRunning {
+			continue
+		}
 		tasks = append(tasks, task.Info())
 	}
 	sort.SliceStable(tasks, func(i, j int) bool {
