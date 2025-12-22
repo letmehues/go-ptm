@@ -16,7 +16,3 @@ linters:
     - typecheck
     - unused
     - revive
-
-linters-settings:
-  revive:
-    rules:
